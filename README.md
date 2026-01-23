@@ -1,6 +1,6 @@
 # Serverless VPC Connector Monitor
 
-An automated monitoring solution that detects Serverless VPC Access Connectors in failed states (`ERROR` or `STATE_UNSPECIFIED`) and alerts via Google Cloud Monitoring.
+An automated monitoring solution that detects Serverless VPC Access Connectors in failed states (`ERROR`) and alerts via Google Cloud Monitoring.
 
 ## 🏗 Architecture
 
@@ -22,7 +22,7 @@ An automated monitoring solution that detects Serverless VPC Access Connectors i
 
 1.  **Clone the repo:**
     ```bash
-    git clone [https://github.com/seils/gcp-vpc-connector-monitor.git](https://github.com/seils/gcp-vpc-connector-monitor.git)
+    git clone https://github.com/seils/gcp-vpc-connector-monitor.git
     cd gcp-vpc-connector-monitor
     ```
 
