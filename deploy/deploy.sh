@@ -31,11 +31,30 @@ echo "Granting Permissions..."
 gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:$SA_EMAIL" --role="roles/vpcaccess.viewer"
 gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:$SA_EMAIL" --role="roles/monitoring.metricWriter"
 
-# 4. Define Custom Metric
+# 4. Define Custom Metric (Run in Virtual Environment)
 echo "Defining Custom Metric..."
 export GCP_PROJECT=$PROJECT_ID
+
+# Check if venv exists, if not create it
+if [ ! -d "venv" ]; then
+    echo "Creating virtual environment..."
+    python3 -m venv venv
+fi
+
+# Activate venv
+source venv/bin/activate
+
+# Install dependencies and run setup
+echo "Installing dependencies..."
+pip install --upgrade pip
 pip install -r src/requirements.txt
+
+echo "Running setup_metric.py..."
 python src/setup_metric.py
+
+# Deactivate venv
+deactivate
+echo "Metric setup complete."
 
 # 5. Create Scheduler Infrastructure
 echo "Creating Scheduler & Topic..."
