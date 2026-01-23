@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e # Exit immediately if a command exits with a non-zero status
+set -e
 
 # Configuration
 PROJECT_ID=$(gcloud config get-value project)
@@ -11,7 +11,7 @@ SERVICE_ACCOUNT_NAME="vpc-monitor-sa"
 
 echo "Deploying to Project: $PROJECT_ID"
 
-# 1. Enable APIs
+# 1. Enable APIs (Added eventarc.googleapis.com)
 echo "Enabling APIs..."
 gcloud services enable cloudfunctions.googleapis.com \
     cloudscheduler.googleapis.com \
@@ -19,10 +19,13 @@ gcloud services enable cloudfunctions.googleapis.com \
     monitoring.googleapis.com \
     run.googleapis.com \
     cloudbuild.googleapis.com \
-    artifactregistry.googleapis.com
+    artifactregistry.googleapis.com \
+    eventarc.googleapis.com
 
-# 2. Fix Default Build Permissions (Crucial for Gen 2 Functions)
-# This fixes the "default build service account is missing permissions" error
+echo "  > Waiting 30 seconds for API propagation..."
+sleep 30
+
+# 2. Fix Default Build Permissions
 echo "Verifying Cloud Build permissions..."
 PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
 DEFAULT_COMPUTE_SA="${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
@@ -36,7 +39,6 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 echo "Creating Service Account..."
 if ! gcloud iam service-accounts describe ${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com > /dev/null 2>&1; then
     gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME --display-name "VPC Monitor Service Account"
-    # IMPORTANT: Wait for propagation
     echo "  > Waiting 30 seconds for Service Account propagation..."
     sleep 30
 else
@@ -44,12 +46,12 @@ else
 fi
 SA_EMAIL="${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
 
-# 4. Grant Permissions to Custom SA
+# 4. Grant Permissions
 echo "Granting Permissions..."
 gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:$SA_EMAIL" --role="roles/vpcaccess.viewer" --condition=None --quiet > /dev/null
 gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:$SA_EMAIL" --role="roles/monitoring.metricWriter" --condition=None --quiet > /dev/null
 
-# 5. Define Custom Metric (Run in Virtual Environment)
+# 5. Define Custom Metric
 echo "Defining Custom Metric..."
 export GCP_PROJECT=$PROJECT_ID
 
@@ -62,7 +64,6 @@ source venv/bin/activate
 
 echo "  > Installing dependencies..."
 pip install --upgrade pip
-# Use extra-index-url to fallback to public PyPI if your private repo fails
 pip install -r src/requirements.txt --extra-index-url https://pypi.org/simple
 
 echo "  > Running setup_metric.py..."
@@ -95,7 +96,7 @@ gcloud functions deploy $FUNCTION_NAME \
     --trigger-topic $TOPIC_NAME \
     --service-account $SA_EMAIL \
     --set-env-vars GCP_PROJECT=$PROJECT_ID,MONITOR_REGIONS=$REGION \
-    --quiet # Prevents interactive prompts
+    --quiet
 
 # 8. Grant Invoker Permission
 echo "Granting Invoker Permission..."
