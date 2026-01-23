@@ -4,7 +4,7 @@ An automated monitoring solution that detects Serverless VPC Access Connectors i
 
 ## 🏗 Architecture
 
-1.  **Cloud Scheduler**: Emits a "tick" event every 1 minute.
+1.  **Cloud Scheduler**: Emits a "run" event every 1 minute.
 2.  **Pub/Sub**: Delivers the event to the Cloud Function.
 3.  **Cloud Function**:
     * Scans all VPC Connectors in the target region(s).
@@ -36,5 +36,5 @@ An automated monitoring solution that detects Serverless VPC Access Connectors i
 After deployment, create an Alert Policy in the Google Cloud Console:
 
 * **Metric:** `custom.googleapis.com/vpc_connector/status`
-* **Filter:** `state = 'ERROR'` OR `state = 'STATE_UNSPECIFIED'`
+* **Filter:** `state = 'ERROR'`
 * **Trigger:** Any value present (Threshold > 0.9).
