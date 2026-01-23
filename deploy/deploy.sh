@@ -3,7 +3,7 @@
 # Configuration
 PROJECT_ID=$(gcloud config get-value project)
 REGION="us-central1"
-TOPIC_NAME="topic-tick-1min"
+TOPIC_NAME="trigger-every-1min"
 SCHEDULER_NAME="scheduler-1min"
 FUNCTION_NAME="monitor_vpc_connectors"
 SERVICE_ACCOUNT_NAME="vpc-monitor-sa"
