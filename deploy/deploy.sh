@@ -98,9 +98,13 @@ gcloud functions deploy $FUNCTION_NAME \
     --set-env-vars GCP_PROJECT=$PROJECT_ID,MONITOR_REGIONS=$REGION \
     --quiet
 
-# 8. Grant Invoker Permission
+# 8. Grant Invoker Permission (UPDATED)
 echo "Granting Invoker Permission..."
-gcloud run services add-iam-policy-binding $FUNCTION_NAME \
+# Cloud Run replaces underscores with hyphens in the service name.
+# We must use the hyphenated name for the Cloud Run command.
+RUN_SERVICE_NAME=${FUNCTION_NAME//_/-}
+
+gcloud run services add-iam-policy-binding $RUN_SERVICE_NAME \
     --region $REGION \
     --member="serviceAccount:$SA_EMAIL" \
     --role="roles/run.invoker" \
