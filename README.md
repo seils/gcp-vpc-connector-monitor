@@ -22,7 +22,7 @@ An automated monitoring solution that detects Serverless VPC Access Connectors i
 
 1.  **Clone the repo:**
     ```bash
-    git clone [https://github.com/your-username/gcp-vpc-connector-monitor.git](https://github.com/your-username/gcp-vpc-connector-monitor.git)
+    git clone [https://github.com/seils/gcp-vpc-connector-monitor.git](https://github.com/seils/gcp-vpc-connector-monitor.git)
     cd gcp-vpc-connector-monitor
     ```
 
